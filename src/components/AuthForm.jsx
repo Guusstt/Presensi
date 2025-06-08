@@ -17,7 +17,7 @@ export default function AuthForm({
       <input
         type="email"
         placeholder="Email"
-        className="border border-gray-300 p-3 rounded-lg w-full mb-4"
+        className="text-gray-800 text-base border border-gray-300 p-3 rounded-lg w-full mb-4"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onKeyPress={handleKeyPress}
@@ -28,7 +28,7 @@ export default function AuthForm({
         <input
           type={showPassword ? "text" : "password"}
           placeholder="Password"
-          className="border border-gray-300 p-3 rounded-lg w-full pr-10"
+          className="text-gray-800 text-base border border-gray-300 p-3 rounded-lg w-full pr-10"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyPress={handleKeyPress}
@@ -47,7 +47,7 @@ export default function AuthForm({
         <input
           type={showPassword ? "text" : "password"}
           placeholder="Konfirmasi Password"
-          className="border border-gray-300 p-3 rounded-lg w-full mb-4"
+          className="text-gray-800 text-base border border-gray-300 p-3 rounded-lg w-full mb-4"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           onKeyPress={handleKeyPress}
