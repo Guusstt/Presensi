@@ -3,7 +3,6 @@ import { supabase } from "../supabase/client";
 import AuthForm from "../components/AuthForm";
 import MessageAlert from "../components/MessageAlert";
 import EmailVerificationBanner from "../components/EmailVerificationBanner";
-import PresenceSection from "../components/PresenceSection";
 import PresenceHistory from "../components/PresenceHistory";
 
 // Koordinat lokasi yang diizinkan
@@ -133,7 +132,10 @@ export default function Login() {
         });
 
         if (error) setMessage(error.message);
-        else fetchPresences();
+        else {
+          setMessage("Presensi berhasil dicatat!");
+          fetchPresences();
+        }
 
         setPresenceLoading(false);
       },
@@ -163,23 +165,40 @@ export default function Login() {
     }
   };
 
+  // Get current time and greeting
+  const getCurrentGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Selamat Pagi";
+    if (hour < 17) return "Selamat Siang";
+    if (hour < 21) return "Selamat Sore";
+    return "Selamat Malam";
+  };
+
+  // Get today's presence count
+  const getTodayPresenceCount = () => {
+    const today = new Date().toDateString();
+    return presences.filter(p => new Date(p.created_at).toDateString() === today).length;
+  };
+
   if (!session) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 p-8 space-y-6">
-            <div className="text-center space-y-2">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-8 space-y-6 transform hover:scale-105 transition-all duration-300">
+            <div className="text-center space-y-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                {isSignUp ? "Daftar Akun" : "Selamat Datang"}
-              </h1>
-              <p className="text-gray-600">
-                {isSignUp ? "Buat akun baru untuk mulai menggunakan aplikasi" : "Masuk ke akun Anda untuk melanjutkan"}
-              </p>
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  {isSignUp ? "Daftar Akun" : "Selamat Datang"}
+                </h1>
+                <p className="text-gray-600 leading-relaxed">
+                  {isSignUp ? "Buat akun baru untuk mulai menggunakan sistem presensi" : "Masuk ke akun Anda untuk melanjutkan presensi"}
+                </p>
+              </div>
             </div>
             
             <AuthForm
@@ -209,36 +228,40 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-white/20 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+      {/* Enhanced Header */}
+      <div className="bg-white/90 backdrop-blur-lg border-b border-white/30 shadow-lg">
+        <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl transform rotate-3">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Dashboard Presensi</h1>
-                <p className="text-sm text-gray-600">Selamat datang, {session.user.email}</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
+                  Dashboard Presensi
+                </h1>
+                <p className="text-gray-600">
+                  {getCurrentGreeting()}, <span className="font-medium">{session.user.email.split('@')[0]}</span>
+                </p>
               </div>
             </div>
             <button
               onClick={signOut}
-              className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center space-x-2"
+              className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              <span>Keluar</span>
+              <span className="font-medium">Keluar</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="max-w-6xl mx-auto p-6 space-y-8">
         {/* Email Verification Banner */}
         <EmailVerificationBanner
           session={session}
@@ -250,54 +273,140 @@ export default function Login() {
         {/* Message Alert */}
         <MessageAlert message={message} />
 
-        {/* Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Presence Section */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
-            <div className="text-center space-y-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-600 rounded-3xl flex items-center justify-center mx-auto shadow-lg">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm font-medium">Hari Ini</p>
+                <p className="text-3xl font-bold">{getTodayPresenceCount()}</p>
+              </div>
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Tandai Kehadiran</h2>
-                <p className="text-gray-600">Klik tombol di bawah untuk mencatat kehadiran Anda hari ini</p>
+                <p className="text-green-100 text-sm font-medium">Total Presensi</p>
+                <p className="text-3xl font-bold">{presences.length}</p>
+              </div>
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-500 to-violet-600 text-white rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm font-medium">Status</p>
+                <p className="text-lg font-bold">{emailVerified ? "Terverifikasi" : "Pending"}</p>
+              </div>
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={emailVerified ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Grid */}
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Enhanced Presence Section */}
+          <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-8 transform hover:scale-105 transition-all duration-300">
+            <div className="text-center space-y-8">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto shadow-2xl transform hover:rotate-12 transition-transform duration-300">
+                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-pulse">
+                  <svg className="w-3 h-3 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-green-600 to-teal-600 bg-clip-text text-transparent">
+                  Tandai Kehadiran
+                </h2>
+                <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">
+                  Pastikan Anda berada di lokasi yang tepat sebelum mencatat kehadiran
+                </p>
               </div>
 
-              <PresenceSection
-                session={session}
-                emailVerified={emailVerified}
-                onSignOut={signOut}
-                onMarkPresence={markPresence}
-                presenceLoading={presenceLoading}
-              />
+              {emailVerified ? (
+                <button
+                  onClick={markPresence}
+                  disabled={presenceLoading}
+                  className="w-full py-4 px-8 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-3"
+                >
+                  {presenceLoading ? (
+                    <>
+                      <svg className="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Memproses...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span>Catat Kehadiran</span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="p-6 bg-yellow-50 border border-yellow-200 rounded-2xl">
+                  <div className="flex items-center justify-center space-x-3 text-yellow-700">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">Verifikasi email diperlukan untuk presensi</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Presence History */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Enhanced Presence History */}
+          <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-400 via-violet-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl transform rotate-3">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Riwayat Kehadiran</h2>
-                  <p className="text-sm text-gray-600">Daftar kehadiran Anda</p>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+                    Riwayat Kehadiran
+                  </h2>
+                  <p className="text-gray-600">Daftar lengkap presensi Anda</p>
                 </div>
               </div>
               
               <button
                 onClick={fetchPresences}
                 disabled={fetchingPresences}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 disabled:opacity-50"
+                className="p-3 bg-gradient-to-r from-purple-500 to-violet-500 text-white rounded-xl hover:from-purple-600 hover:to-violet-600 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <svg className={`w-5 h-5 ${fetchingPresences ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 -5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </button>
             </div>
