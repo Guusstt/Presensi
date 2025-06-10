@@ -6,8 +6,10 @@ import EmailVerificationBanner from "../components/EmailVerificationBanner";
 import PresenceHistory from "../components/PresenceHistory";
 
 // Koordinat lokasi yang diizinkan
-const ALLOWED_LAT = -6.5695979;
-const ALLOWED_LNG = 110.6871696;
+// const ALLOWED_LAT = -6.5695979;
+// const ALLOWED_LNG = 110.6871696;
+const ALLOWED_LAT = -7.8213535;
+const ALLOWED_LNG = 110.4019936;
 const ALLOWED_RADIUS_METERS = 30; // Radius maksimum presensi (dalam meter)
 
 // Konfigurasi waktu presensi
