@@ -1,12 +1,19 @@
 export default function AuthForm({
-  isSignUp, setIsSignUp,
-  email, setEmail,
-  password, setPassword,
-  confirmPassword, setConfirmPassword,
-  loading, onSubmit,
-  message, setMessage,
-  showPassword, setShowPassword,
-  handleKeyPress
+  isSignUp,
+  setIsSignUp,
+  email,
+  setEmail,
+  password,
+  setPassword,
+  confirmPassword,
+  setConfirmPassword,
+  loading,
+  onSubmit,
+  message,
+  setMessage,
+  showPassword,
+  setShowPassword,
+  handleKeyPress,
 }) {
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
@@ -60,24 +67,14 @@ export default function AuthForm({
         disabled={loading}
         className="bg-blue-600 text-white px-4 py-3 rounded-lg w-full hover:bg-blue-700 disabled:opacity-50"
       >
-        {loading ? (isSignUp ? "Mendaftar..." : "Login...") : (isSignUp ? "Daftar" : "Login")}
+        {loading
+          ? isSignUp
+            ? "Mendaftar..."
+            : "Login..."
+          : isSignUp
+          ? "Daftar"
+          : "Login"}
       </button>
-
-      <div className="text-center mt-4">
-        <button
-          onClick={() => {
-            setIsSignUp(!isSignUp);
-            setEmail("");
-            setPassword("");
-            setConfirmPassword("");
-            setMessage({ text: "", type: "" });
-          }}
-          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-          disabled={loading}
-        >
-          {isSignUp ? "Sudah punya akun? Login di sini" : "Belum punya akun? Daftar di sini"}
-        </button>
-      </div>
     </div>
   );
 }
