@@ -248,9 +248,25 @@ export default function Login() {
         );
 
         if (distance > ALLOWED_RADIUS_METERS) {
-          setMessage("Anda berada di luar area yang diizinkan untuk presensi.");
+          // Pesan ini akan muncul di console browser untuk debugging
+          console.log(
+            "KONDISI TERPENUHI: Jarak melebihi radius. Alert akan muncul."
+          );
+
+          const distanceInMeters = Math.round(distance);
+          const alertMessage = `Presensi Gagal! Anda di luar jangkauan.\n\nJarak Anda: ~${distanceInMeters}m\nRadius Izin: ${ALLOWED_RADIUS_METERS}m`;
+
+          // Baris inilah yang akan memunculkan pop-up notifikasi
+          window.alert(alertMessage);
+
+          setMessage(
+            `Anda berada di luar jangkauan (${distanceInMeters}m dari lokasi).`
+          );
           setPresenceLoading(false);
           return;
+        } else {
+          // Pesan ini akan muncul di console jika Anda masih dalam jangkauan
+          console.log("KONDISI TIDAK TERPENUHI: Jarak masih di dalam radius.");
         }
 
         const { error } = await supabase.from("presences").insert({
