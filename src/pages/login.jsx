@@ -21,7 +21,7 @@ const PRESENCE_CONFIG = {
   },
   afternoon: {
     start: { hour: 12, minute: 0 },
-    end: { hour: 24, minute: 0 },
+    end: { hour: 13, minute: 0 },
     label: "Siang",
   },
 };
