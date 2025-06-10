@@ -945,28 +945,6 @@ export default function Login() {
                   <p className="text-gray-600">Daftar lengkap presensi Anda</p>
                 </div>
               </div>
-
-              <button
-                onClick={fetchPresences}
-                disabled={fetchingPresences}
-                className="p-3 bg-gradient-to-r from-purple-500 to-violet-500 text-white rounded-xl hover:from-purple-600 hover:to-violet-600 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <svg
-                  className={`w-5 h-5 ${
-                    fetchingPresences ? "animate-spin" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 -5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              </button>
             </div>
 
             <PresenceHistory
