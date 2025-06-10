@@ -6,10 +6,10 @@ import EmailVerificationBanner from "../components/EmailVerificationBanner";
 import PresenceHistory from "../components/PresenceHistory";
 
 // Koordinat lokasi yang diizinkan
-// const ALLOWED_LAT = -6.5695979;
-// const ALLOWED_LNG = 110.6871696;
-const ALLOWED_LAT = -7.8213535;
-const ALLOWED_LNG = 110.4019936;
+const ALLOWED_LAT = -6.5695979;
+const ALLOWED_LNG = 110.6871696;
+// const ALLOWED_LAT = -7.8213535;
+// const ALLOWED_LNG = 110.4019936;
 const ALLOWED_RADIUS_METERS = 30; // Radius maksimum presensi (dalam meter)
 
 // Konfigurasi waktu presensi
@@ -133,12 +133,25 @@ export default function Login() {
 
   const signIn = async () => {
     setLoading(true);
-    setMessage("");
+    setMessage(""); // Selalu reset pesan di awal
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (error) setMessage(error.message);
+
+    if (error) {
+      // Cek apakah pesan error spesifik untuk kredensial yang salah
+      if (error.message === "Invalid login credentials") {
+        setMessage(
+          "Email atau password yang Anda masukkan salah. Silakan coba lagi."
+        );
+      } else {
+        // Tampilkan pesan error lain jika ada masalah yang berbeda (misal: masalah jaringan)
+        setMessage(error.message);
+      }
+    }
+
     setLoading(false);
   };
 

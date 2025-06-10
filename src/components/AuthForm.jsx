@@ -16,6 +16,7 @@ export default function AuthForm({
   handleKeyPress,
 }) {
   return (
+    // Anda menggunakan div di sini, bukan form, jadi onClick pada button sudah cukup
     <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-4 text-gray-800 text-center">
         {isSignUp ? "Daftar Akun" : "Login"}
@@ -46,7 +47,8 @@ export default function AuthForm({
           onClick={() => setShowPassword(!showPassword)}
           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
         >
-          {showPassword ? "👁️" : "👁️‍🗨️"}
+          {/* Menggunakan emoji yang lebih konsisten antar platform */}
+          {showPassword ? "🙈" : "👁️"}
         </button>
       </div>
 
@@ -61,6 +63,15 @@ export default function AuthForm({
           disabled={loading}
         />
       )}
+
+      {/* =================================================== */}
+      {/* TAMBAHKAN KODE INI UNTUK MENAMPILKAN PESAN ERROR */}
+      {message && (
+        <div className="p-3 my-3 text-center text-sm font-medium text-red-800 bg-red-100 rounded-lg">
+          {message}
+        </div>
+      )}
+      {/* =================================================== */}
 
       <button
         onClick={onSubmit}
