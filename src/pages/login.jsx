@@ -15,12 +15,12 @@ const ALLOWED_RADIUS_METERS = 30; // Radius maksimum presensi (dalam meter)
 // Konfigurasi waktu presensi
 const PRESENCE_CONFIG = {
   morning: {
-    start: { hour: 7, minute: 0 },
-    end: { hour: 8, minute: 0 },
+    start: { hour: 6, minute: 30 },
+    end: { hour: 7, minute: 15 },
     label: "Pagi",
   },
   afternoon: {
-    start: { hour: 12, minute: 0 },
+    start: { hour: 12, minute: 15 },
     end: { hour: 13, minute: 0 },
     label: "Siang",
   },
