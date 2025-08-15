@@ -41,9 +41,11 @@ function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Fungsi untuk mengecek waktu presensi yang valid
+// --- PERUBAHAN ---
+// Fungsi untuk mengecek waktu presensi yang valid, dengan logika khusus hari Jumat
 function getValidPresenceType() {
   const now = new Date();
+  const currentDay = now.getDay(); // 0=Minggu, 1=Senin, ..., 5=Jumat
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   const currentTime = currentHour * 60 + currentMinute;
@@ -55,13 +57,23 @@ function getValidPresenceType() {
   const morningEnd =
     PRESENCE_CONFIG.morning.end.hour * 60 + PRESENCE_CONFIG.morning.end.minute;
 
-  // Cek waktu siang
+  // Cek waktu siang dengan kondisi khusus hari Jumat
+  let afternoonConfig;
+  if (currentDay === 5) {
+    // Jadwal khusus hari Jumat
+    afternoonConfig = {
+      start: { hour: 11, minute: 0 },
+      end: { hour: 11, minute: 15 },
+    };
+  } else {
+    // Jadwal hari biasa
+    afternoonConfig = PRESENCE_CONFIG.afternoon;
+  }
+
   const afternoonStart =
-    PRESENCE_CONFIG.afternoon.start.hour * 60 +
-    PRESENCE_CONFIG.afternoon.start.minute;
+    afternoonConfig.start.hour * 60 + afternoonConfig.start.minute;
   const afternoonEnd =
-    PRESENCE_CONFIG.afternoon.end.hour * 60 +
-    PRESENCE_CONFIG.afternoon.end.minute;
+    afternoonConfig.end.hour * 60 + afternoonConfig.end.minute;
 
   if (currentTime >= morningStart && currentTime <= morningEnd) {
     return { type: "morning", label: PRESENCE_CONFIG.morning.label };
@@ -191,6 +203,13 @@ export default function Login() {
     // Cek apakah saat ini dalam waktu presensi yang valid
     const presenceType = getValidPresenceType();
     if (!presenceType) {
+      // --- PERUBAHAN ---
+      // Menyesuaikan pesan notifikasi dengan jadwal hari Jumat
+      const isFriday = new Date().getDay() === 5;
+      const afternoonConfig = isFriday
+        ? { start: { hour: 11, minute: 0 }, end: { hour: 11, minute: 15 } }
+        : PRESENCE_CONFIG.afternoon;
+
       const morningTime = `${formatTime(
         PRESENCE_CONFIG.morning.start.hour,
         PRESENCE_CONFIG.morning.start.minute
@@ -199,15 +218,14 @@ export default function Login() {
         PRESENCE_CONFIG.morning.end.minute
       )}`;
       const afternoonTime = `${formatTime(
-        PRESENCE_CONFIG.afternoon.start.hour,
-        PRESENCE_CONFIG.afternoon.start.minute
-      )} - ${formatTime(
-        PRESENCE_CONFIG.afternoon.end.hour,
-        PRESENCE_CONFIG.afternoon.end.minute
-      )}`;
+        afternoonConfig.start.hour,
+        afternoonConfig.start.minute
+      )} - ${formatTime(afternoonConfig.end.hour, afternoonConfig.end.minute)}`;
 
       setMessage(
-        `Presensi hanya dapat dilakukan pada waktu yang ditentukan:\nPagi: ${morningTime}\nSiang: ${afternoonTime}`
+        `Presensi hanya dapat dilakukan pada waktu yang ditentukan:\nPagi: ${morningTime}\nSiang: ${afternoonTime} ${
+          isFriday ? "(Jadwal Jumat)" : ""
+        }`
       );
       setPresenceLoading(false);
       return;
@@ -424,6 +442,13 @@ export default function Login() {
 
   const todayStatus = getTodayPresenceStatus();
   const attendanceSummary = getAttendanceSummary();
+
+  // --- PERUBAHAN ---
+  // Mendefinisikan konfigurasi siang yang dinamis untuk ditampilkan di UI
+  const isFriday = new Date().getDay() === 5;
+  const afternoonDisplayConfig = isFriday
+    ? { start: { hour: 11, minute: 0 }, end: { hour: 11, minute: 15 } }
+    : PRESENCE_CONFIG.afternoon;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -703,15 +728,21 @@ export default function Login() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-800">Presensi Siang</p>
+                  {/* --- PERUBAHAN --- */}
                   <p className="text-sm text-gray-600">
                     {formatTime(
-                      PRESENCE_CONFIG.afternoon.start.hour,
-                      PRESENCE_CONFIG.afternoon.start.minute
+                      afternoonDisplayConfig.start.hour,
+                      afternoonDisplayConfig.start.minute
                     )}{" "}
                     -{" "}
                     {formatTime(
-                      PRESENCE_CONFIG.afternoon.end.hour,
-                      PRESENCE_CONFIG.afternoon.end.minute
+                      afternoonDisplayConfig.end.hour,
+                      afternoonDisplayConfig.end.minute
+                    )}
+                    {isFriday && (
+                      <span className="text-xs font-bold text-blue-600 ml-1">
+                        (Jumat)
+                      </span>
                     )}
                   </p>
                   <p
@@ -794,6 +825,7 @@ export default function Login() {
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
+                      {/* --- PERUBAHAN --- */}
                       {currentPresenceType.type === "morning"
                         ? `${formatTime(
                             PRESENCE_CONFIG.morning.start.hour,
@@ -803,11 +835,11 @@ export default function Login() {
                             PRESENCE_CONFIG.morning.end.minute
                           )}`
                         : `${formatTime(
-                            PRESENCE_CONFIG.afternoon.start.hour,
-                            PRESENCE_CONFIG.afternoon.start.minute
+                            afternoonDisplayConfig.start.hour,
+                            afternoonDisplayConfig.start.minute
                           )} - ${formatTime(
-                            PRESENCE_CONFIG.afternoon.end.hour,
-                            PRESENCE_CONFIG.afternoon.end.minute
+                            afternoonDisplayConfig.end.hour,
+                            afternoonDisplayConfig.end.minute
                           )}`}
                     </div>
                   </div>
@@ -831,17 +863,23 @@ export default function Login() {
                           )}
                         </span>
                       </div>
+                      {/* --- PERUBAHAN --- */}
                       <div className="flex items-center justify-center space-x-2">
                         <span className="font-medium">Siang:</span>
                         <span>
                           {formatTime(
-                            PRESENCE_CONFIG.afternoon.start.hour,
-                            PRESENCE_CONFIG.afternoon.start.minute
+                            afternoonDisplayConfig.start.hour,
+                            afternoonDisplayConfig.start.minute
                           )}{" "}
                           -{" "}
                           {formatTime(
-                            PRESENCE_CONFIG.afternoon.end.hour,
-                            PRESENCE_CONFIG.afternoon.end.minute
+                            afternoonDisplayConfig.end.hour,
+                            afternoonDisplayConfig.end.minute
+                          )}
+                          {isFriday && (
+                            <span className="text-xs font-bold text-blue-600 ml-1">
+                              (Jumat)
+                            </span>
                           )}
                         </span>
                       </div>
