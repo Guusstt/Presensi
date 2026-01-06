@@ -6,10 +6,10 @@ import EmailVerificationBanner from "../components/EmailVerificationBanner";
 import PresenceHistory from "../components/PresenceHistory";
 
 // Koordinat lokasi yang diizinkan
-// const ALLOWED_LAT = -6.569399;
-// const ALLOWED_LNG = 110.686943;
-const ALLOWED_LAT = -7.8213535;
-const ALLOWED_LNG = 110.4019936;
+const ALLOWED_LAT = -6.569399;
+const ALLOWED_LNG = 110.686943;
+// const ALLOWED_LAT = -7.8213535;
+// const ALLOWED_LNG = 110.4019936;
 const ALLOWED_RADIUS_METERS = 50; // Radius maksimum presensi (dalam meter)
 
 // Konfigurasi waktu presensi
@@ -21,7 +21,7 @@ const PRESENCE_CONFIG = {
   },
   afternoon: {
     start: { hour: 12, minute: 15 },
-    end: { hour: 24, minute: 0 },
+    end: { hour: 13, minute: 0 },
     label: "Siang",
   },
 };
