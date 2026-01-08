@@ -6,7 +6,7 @@ export default function PresenceSection({
   presenceLoading,
 }) {
   if (!session || !session.user) {
-    return null; // Atau tampilkan fallback UI jika session belum siap
+    return null; 
   }
 
   return (

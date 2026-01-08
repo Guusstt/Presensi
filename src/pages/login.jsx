@@ -5,14 +5,13 @@ import MessageAlert from "../components/MessageAlert";
 import EmailVerificationBanner from "../components/EmailVerificationBanner";
 import PresenceHistory from "../components/PresenceHistory";
 
-// Koordinat lokasi yang diizinkan
+
 const ALLOWED_LAT = -6.569399;
 const ALLOWED_LNG = 110.686943;
 // const ALLOWED_LAT = -7.8213535;
 // const ALLOWED_LNG = 110.4019936;
-const ALLOWED_RADIUS_METERS = 50; // Radius maksimum presensi (dalam meter)
+const ALLOWED_RADIUS_METERS = 50; 
 
-// Konfigurasi waktu presensi
 const PRESENCE_CONFIG = {
   morning: {
     start: { hour: 6, minute: 30 },
@@ -26,9 +25,8 @@ const PRESENCE_CONFIG = {
   },
 };
 
-// Fungsi menghitung jarak antara dua koordinat (dalam meter)
 function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371000; // Radius bumi dalam meter
+  const R = 6371000; 
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -41,32 +39,29 @@ function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// --- PERUBAHAN ---
-// Fungsi untuk mengecek waktu presensi yang valid, dengan logika khusus hari Jumat
+
 function getValidPresenceType() {
   const now = new Date();
-  const currentDay = now.getDay(); // 0=Minggu, 1=Senin, ..., 5=Jumat
+  const currentDay = now.getDay();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   const currentTime = currentHour * 60 + currentMinute;
 
-  // Cek waktu pagi
+
   const morningStart =
     PRESENCE_CONFIG.morning.start.hour * 60 +
     PRESENCE_CONFIG.morning.start.minute;
   const morningEnd =
     PRESENCE_CONFIG.morning.end.hour * 60 + PRESENCE_CONFIG.morning.end.minute;
 
-  // Cek waktu siang dengan kondisi khusus hari Jumat
   let afternoonConfig;
   if (currentDay === 5) {
-    // Jadwal khusus hari Jumat
+
     afternoonConfig = {
       start: { hour: 11, minute: 0 },
       end: { hour: 11, minute: 15 },
     };
   } else {
-    // Jadwal hari biasa
     afternoonConfig = PRESENCE_CONFIG.afternoon;
   }
 
@@ -84,7 +79,6 @@ function getValidPresenceType() {
   return null;
 }
 
-// Fungsi untuk format waktu
 function formatTime(hour, minute) {
   return `${hour.toString().padStart(2, "0")}:${minute
     .toString()
@@ -131,21 +125,20 @@ export default function Login() {
     }
   }, [session]);
 
-  // Update current presence type setiap menit
   useEffect(() => {
     const updatePresenceType = () => {
       setCurrentPresenceType(getValidPresenceType());
     };
 
     updatePresenceType();
-    const interval = setInterval(updatePresenceType, 60000); // Update setiap menit
+    const interval = setInterval(updatePresenceType, 60000);
 
     return () => clearInterval(interval);
   }, []);
 
   const signIn = async () => {
     setLoading(true);
-    setMessage(""); // Selalu reset pesan di awal
+    setMessage("");
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -153,13 +146,11 @@ export default function Login() {
     });
 
     if (error) {
-      // Cek apakah pesan error spesifik untuk kredensial yang salah
       if (error.message === "Invalid login credentials") {
         setMessage(
           "Email atau password yang Anda masukkan salah. Silakan coba lagi."
         );
       } else {
-        // Tampilkan pesan error lain jika ada masalah yang berbeda (misal: masalah jaringan)
         setMessage(error.message);
       }
     }
@@ -200,11 +191,9 @@ export default function Login() {
     setPresenceLoading(true);
     setMessage("");
 
-    // Cek apakah saat ini dalam waktu presensi yang valid
     const presenceType = getValidPresenceType();
     if (!presenceType) {
-      // --- PERUBAHAN ---
-      // Menyesuaikan pesan notifikasi dengan jadwal hari Jumat
+
       const isFriday = new Date().getDay() === 5;
       const afternoonConfig = isFriday
         ? { start: { hour: 11, minute: 0 }, end: { hour: 11, minute: 15 } }
@@ -231,7 +220,6 @@ export default function Login() {
       return;
     }
 
-    // Cek apakah sudah presensi untuk tipe ini hari ini
     const today = new Date().toDateString();
     const todayPresences = presences.filter(
       (p) => new Date(p.created_at).toDateString() === today
@@ -266,7 +254,6 @@ export default function Login() {
         );
 
         if (distance > ALLOWED_RADIUS_METERS) {
-          // Pesan ini akan muncul di console browser untuk debugging
           console.log(
             "KONDISI TERPENUHI: Jarak melebihi radius. Alert akan muncul."
           );
@@ -274,7 +261,6 @@ export default function Login() {
           const distanceInMeters = Math.round(distance);
           const alertMessage = `Presensi Gagal! Anda di luar jangkauan.\n\nJarak Anda: ~${distanceInMeters}m\nRadius Izin: ${ALLOWED_RADIUS_METERS}m`;
 
-          // Baris inilah yang akan memunculkan pop-up notifikasi
           window.alert(alertMessage);
 
           setMessage(
@@ -283,7 +269,6 @@ export default function Login() {
           setPresenceLoading(false);
           return;
         } else {
-          // Pesan ini akan muncul di console jika Anda masih dalam jangkauan
           console.log("KONDISI TIDAK TERPENUHI: Jarak masih di dalam radius.");
         }
 
@@ -291,7 +276,7 @@ export default function Login() {
           user_id: session.user.id,
           latitude,
           longitude,
-          presence_type: presenceType.type, // 'morning' atau 'afternoon'
+          presence_type: presenceType.type, 
           presence_label: presenceType.label,
         });
 
@@ -334,7 +319,6 @@ export default function Login() {
     }
   };
 
-  // Get current time and greeting
   const getCurrentGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Selamat Pagi";
@@ -343,7 +327,6 @@ export default function Login() {
     return "Selamat Malam";
   };
 
-  // Get today's presence status
   const getTodayPresenceStatus = () => {
     const today = new Date().toDateString();
     const todayPresences = presences.filter(
@@ -365,7 +348,6 @@ export default function Login() {
     };
   };
 
-  // Get attendance summary
   const getAttendanceSummary = () => {
     const dates = {};
     presences.forEach((p) => {
@@ -443,8 +425,7 @@ export default function Login() {
   const todayStatus = getTodayPresenceStatus();
   const attendanceSummary = getAttendanceSummary();
 
-  // --- PERUBAHAN ---
-  // Mendefinisikan konfigurasi siang yang dinamis untuk ditampilkan di UI
+
   const isFriday = new Date().getDay() === 5;
   const afternoonDisplayConfig = isFriday
     ? { start: { hour: 11, minute: 0 }, end: { hour: 11, minute: 15 } }
@@ -452,7 +433,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Enhanced Header */}
       <div className="bg-white/90 backdrop-blur-lg border-b border-white/30 shadow-lg">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
@@ -507,9 +487,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-6xl mx-auto p-6 space-y-8">
-        {/* Email Verification Banner */}
         <EmailVerificationBanner
           session={session}
           emailVerified={emailVerified}
@@ -517,10 +495,8 @@ export default function Login() {
           loading={loading}
         />
 
-        {/* Message Alert */}
         <MessageAlert message={message} />
 
-        {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6 shadow-xl">
             <div className="flex items-center justify-between">
@@ -636,7 +612,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Today's Status Card */}
         <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-6 mb-8">
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             Status Presensi Hari Ini
@@ -728,7 +703,6 @@ export default function Login() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-800">Presensi Siang</p>
-                  {/* --- PERUBAHAN --- */}
                   <p className="text-sm text-gray-600">
                     {formatTime(
                       afternoonDisplayConfig.start.hour,
@@ -760,9 +734,7 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Content Grid */}
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Enhanced Presence Section */}
           <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-8 transform hover:scale-105 transition-all duration-300">
             <div className="text-center space-y-8">
               <div className="relative">
@@ -825,7 +797,6 @@ export default function Login() {
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      {/* --- PERUBAHAN --- */}
                       {currentPresenceType.type === "morning"
                         ? `${formatTime(
                             PRESENCE_CONFIG.morning.start.hour,
@@ -863,7 +834,6 @@ export default function Login() {
                           )}
                         </span>
                       </div>
-                      {/* --- PERUBAHAN --- */}
                       <div className="flex items-center justify-center space-x-2">
                         <span className="font-medium">Siang:</span>
                         <span>
@@ -988,7 +958,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Enhanced Presence History */}
           <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-8">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-4">
