@@ -5,28 +5,40 @@ import MessageAlert from "../components/MessageAlert";
 import EmailVerificationBanner from "../components/EmailVerificationBanner";
 import PresenceHistory from "../components/PresenceHistory";
 
-
 const ALLOWED_LAT = -6.569399;
 const ALLOWED_LNG = 110.686943;
 // const ALLOWED_LAT = -7.8213535;
 // const ALLOWED_LNG = 110.4019936;
-const ALLOWED_RADIUS_METERS = 50; 
+const ALLOWED_RADIUS_METERS = 50;
+
+// const PRESENCE_CONFIG = {
+//   morning: {
+//     start: { hour: 6, minute: 30 },
+//     end: { hour: 7, minute: 15 },
+//     label: "Pagi",
+//   },
+//   afternoon: {
+//     start: { hour: 12, minute: 15 },
+//     end: { hour: 13, minute: 0 },
+//     label: "Siang",
+//   },
+// };
 
 const PRESENCE_CONFIG = {
   morning: {
-    start: { hour: 6, minute: 30 },
-    end: { hour: 7, minute: 15 },
+    start: { hour: 7, minute: 0 },
+    end: { hour: 7, minute: 30 },
     label: "Pagi",
   },
   afternoon: {
-    start: { hour: 12, minute: 15 },
-    end: { hour: 13, minute: 0 },
+    start: { hour: 10, minute: 45 },
+    end: { hour: 11, minute: 15 },
     label: "Siang",
   },
 };
 
 function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371000; 
+  const R = 6371000;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -39,14 +51,12 @@ function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-
 function getValidPresenceType() {
   const now = new Date();
   const currentDay = now.getDay();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   const currentTime = currentHour * 60 + currentMinute;
-
 
   const morningStart =
     PRESENCE_CONFIG.morning.start.hour * 60 +
@@ -56,7 +66,6 @@ function getValidPresenceType() {
 
   let afternoonConfig;
   if (currentDay === 5) {
-
     afternoonConfig = {
       start: { hour: 11, minute: 0 },
       end: { hour: 11, minute: 15 },
@@ -148,7 +157,7 @@ export default function Login() {
     if (error) {
       if (error.message === "Invalid login credentials") {
         setMessage(
-          "Email atau password yang Anda masukkan salah. Silakan coba lagi."
+          "Email atau password yang Anda masukkan salah. Silakan coba lagi.",
         );
       } else {
         setMessage(error.message);
@@ -193,28 +202,32 @@ export default function Login() {
 
     const presenceType = getValidPresenceType();
     if (!presenceType) {
-
       const isFriday = new Date().getDay() === 5;
+      // const afternoonConfig = isFriday
+      //   ? { start: { hour: 11, minute: 0 }, end: { hour: 11, minute: 15 } }
+      //   : PRESENCE_CONFIG.afternoon;
+
+      // jadwal ramadhan
       const afternoonConfig = isFriday
-        ? { start: { hour: 11, minute: 0 }, end: { hour: 11, minute: 15 } }
+        ? { start: { hour: 10, minute: 15 }, end: { hour: 10, minute: 30 } }
         : PRESENCE_CONFIG.afternoon;
 
       const morningTime = `${formatTime(
         PRESENCE_CONFIG.morning.start.hour,
-        PRESENCE_CONFIG.morning.start.minute
+        PRESENCE_CONFIG.morning.start.minute,
       )} - ${formatTime(
         PRESENCE_CONFIG.morning.end.hour,
-        PRESENCE_CONFIG.morning.end.minute
+        PRESENCE_CONFIG.morning.end.minute,
       )}`;
       const afternoonTime = `${formatTime(
         afternoonConfig.start.hour,
-        afternoonConfig.start.minute
+        afternoonConfig.start.minute,
       )} - ${formatTime(afternoonConfig.end.hour, afternoonConfig.end.minute)}`;
 
       setMessage(
         `Presensi hanya dapat dilakukan pada waktu yang ditentukan:\nPagi: ${morningTime}\nSiang: ${afternoonTime} ${
           isFriday ? "(Jadwal Jumat)" : ""
-        }`
+        }`,
       );
       setPresenceLoading(false);
       return;
@@ -222,15 +235,15 @@ export default function Login() {
 
     const today = new Date().toDateString();
     const todayPresences = presences.filter(
-      (p) => new Date(p.created_at).toDateString() === today
+      (p) => new Date(p.created_at).toDateString() === today,
     );
 
     const alreadyPresent = todayPresences.some(
-      (p) => p.presence_type === presenceType.type
+      (p) => p.presence_type === presenceType.type,
     );
     if (alreadyPresent) {
       setMessage(
-        `Anda sudah melakukan presensi ${presenceType.label.toLowerCase()} hari ini.`
+        `Anda sudah melakukan presensi ${presenceType.label.toLowerCase()} hari ini.`,
       );
       setPresenceLoading(false);
       return;
@@ -250,12 +263,12 @@ export default function Login() {
           latitude,
           longitude,
           ALLOWED_LAT,
-          ALLOWED_LNG
+          ALLOWED_LNG,
         );
 
         if (distance > ALLOWED_RADIUS_METERS) {
           console.log(
-            "KONDISI TERPENUHI: Jarak melebihi radius. Alert akan muncul."
+            "KONDISI TERPENUHI: Jarak melebihi radius. Alert akan muncul.",
           );
 
           const distanceInMeters = Math.round(distance);
@@ -264,7 +277,7 @@ export default function Login() {
           window.alert(alertMessage);
 
           setMessage(
-            `Anda berada di luar jangkauan (${distanceInMeters}m dari lokasi).`
+            `Anda berada di luar jangkauan (${distanceInMeters}m dari lokasi).`,
           );
           setPresenceLoading(false);
           return;
@@ -276,7 +289,7 @@ export default function Login() {
           user_id: session.user.id,
           latitude,
           longitude,
-          presence_type: presenceType.type, 
+          presence_type: presenceType.type,
           presence_label: presenceType.label,
         });
 
@@ -284,7 +297,7 @@ export default function Login() {
           setMessage(error.message);
         } else {
           setMessage(
-            `Presensi ${presenceType.label.toLowerCase()} berhasil dicatat!`
+            `Presensi ${presenceType.label.toLowerCase()} berhasil dicatat!`,
           );
           fetchPresences();
         }
@@ -293,11 +306,11 @@ export default function Login() {
       },
       (error) => {
         setMessage(
-          "Gagal mendapatkan lokasi. Pastikan izin lokasi diaktifkan."
+          "Gagal mendapatkan lokasi. Pastikan izin lokasi diaktifkan.",
         );
         setPresenceLoading(false);
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true },
     );
   };
 
@@ -330,14 +343,14 @@ export default function Login() {
   const getTodayPresenceStatus = () => {
     const today = new Date().toDateString();
     const todayPresences = presences.filter(
-      (p) => new Date(p.created_at).toDateString() === today
+      (p) => new Date(p.created_at).toDateString() === today,
     );
 
     const morningPresence = todayPresences.find(
-      (p) => p.presence_type === "morning"
+      (p) => p.presence_type === "morning",
     );
     const afternoonPresence = todayPresences.find(
-      (p) => p.presence_type === "afternoon"
+      (p) => p.presence_type === "afternoon",
     );
 
     return {
@@ -359,7 +372,7 @@ export default function Login() {
     });
 
     const completeDays = Object.values(dates).filter(
-      (day) => day.morning && day.afternoon
+      (day) => day.morning && day.afternoon,
     ).length;
     return { totalDays: Object.keys(dates).length, completeDays };
   };
@@ -424,7 +437,6 @@ export default function Login() {
 
   const todayStatus = getTodayPresenceStatus();
   const attendanceSummary = getAttendanceSummary();
-
 
   const isFriday = new Date().getDay() === 5;
   const afternoonDisplayConfig = isFriday
@@ -651,12 +663,12 @@ export default function Login() {
                   <p className="text-sm text-gray-600">
                     {formatTime(
                       PRESENCE_CONFIG.morning.start.hour,
-                      PRESENCE_CONFIG.morning.start.minute
+                      PRESENCE_CONFIG.morning.start.minute,
                     )}{" "}
                     -{" "}
                     {formatTime(
                       PRESENCE_CONFIG.morning.end.hour,
-                      PRESENCE_CONFIG.morning.end.minute
+                      PRESENCE_CONFIG.morning.end.minute,
                     )}
                   </p>
                   <p
@@ -706,12 +718,12 @@ export default function Login() {
                   <p className="text-sm text-gray-600">
                     {formatTime(
                       afternoonDisplayConfig.start.hour,
-                      afternoonDisplayConfig.start.minute
+                      afternoonDisplayConfig.start.minute,
                     )}{" "}
                     -{" "}
                     {formatTime(
                       afternoonDisplayConfig.end.hour,
-                      afternoonDisplayConfig.end.minute
+                      afternoonDisplayConfig.end.minute,
                     )}
                     {isFriday && (
                       <span className="text-xs font-bold text-blue-600 ml-1">
@@ -800,17 +812,17 @@ export default function Login() {
                       {currentPresenceType.type === "morning"
                         ? `${formatTime(
                             PRESENCE_CONFIG.morning.start.hour,
-                            PRESENCE_CONFIG.morning.start.minute
+                            PRESENCE_CONFIG.morning.start.minute,
                           )} - ${formatTime(
                             PRESENCE_CONFIG.morning.end.hour,
-                            PRESENCE_CONFIG.morning.end.minute
+                            PRESENCE_CONFIG.morning.end.minute,
                           )}`
                         : `${formatTime(
                             afternoonDisplayConfig.start.hour,
-                            afternoonDisplayConfig.start.minute
+                            afternoonDisplayConfig.start.minute,
                           )} - ${formatTime(
                             afternoonDisplayConfig.end.hour,
-                            afternoonDisplayConfig.end.minute
+                            afternoonDisplayConfig.end.minute,
                           )}`}
                     </div>
                   </div>
@@ -825,12 +837,12 @@ export default function Login() {
                         <span>
                           {formatTime(
                             PRESENCE_CONFIG.morning.start.hour,
-                            PRESENCE_CONFIG.morning.start.minute
+                            PRESENCE_CONFIG.morning.start.minute,
                           )}{" "}
                           -{" "}
                           {formatTime(
                             PRESENCE_CONFIG.morning.end.hour,
-                            PRESENCE_CONFIG.morning.end.minute
+                            PRESENCE_CONFIG.morning.end.minute,
                           )}
                         </span>
                       </div>
@@ -839,12 +851,12 @@ export default function Login() {
                         <span>
                           {formatTime(
                             afternoonDisplayConfig.start.hour,
-                            afternoonDisplayConfig.start.minute
+                            afternoonDisplayConfig.start.minute,
                           )}{" "}
                           -{" "}
                           {formatTime(
                             afternoonDisplayConfig.end.hour,
-                            afternoonDisplayConfig.end.minute
+                            afternoonDisplayConfig.end.minute,
                           )}
                           {isFriday && (
                             <span className="text-xs font-bold text-blue-600 ml-1">
