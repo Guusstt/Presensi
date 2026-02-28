@@ -4,6 +4,7 @@ import AuthForm from "../components/AuthForm";
 import MessageAlert from "../components/MessageAlert";
 import EmailVerificationBanner from "../components/EmailVerificationBanner";
 import PresenceHistory from "../components/PresenceHistory";
+import AdminDashboard from "../pages/admin/AdminDashboard";
 
 const ALLOWED_LAT = -6.569399;
 const ALLOWED_LNG = 110.686943;
@@ -108,6 +109,9 @@ export default function Login() {
   const [fetchingPresences, setFetchingPresences] = useState(false);
   const [presences, setPresences] = useState([]);
   const [currentPresenceType, setCurrentPresenceType] = useState(null);
+  const [userRole, setUserRole] = useState(
+    localStorage.getItem("userRole") || null,
+  );
 
   useEffect(() => {
     const getSession = async () => {
@@ -149,7 +153,7 @@ export default function Login() {
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -161,6 +165,25 @@ export default function Login() {
         );
       } else {
         setMessage(error.message);
+      }
+      setLoading(false);
+      return;
+    }
+
+    if (authData.user) {
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (!profileError && profileData) {
+        localStorage.setItem("userRole", profileData.role);
+        setUserRole(profileData.role);
+      } else {
+        console.error("Gagal ambil role:", profileError);
+        localStorage.setItem("userRole", "guru");
+        setUserRole("guru");
       }
     }
 
@@ -186,6 +209,9 @@ export default function Login() {
     setEmail("");
     setPassword("");
     setConfirmPassword("");
+
+    localStorage.removeItem("userRole");
+    setUserRole(null);
   };
 
   const resendVerification = async () => {
@@ -434,7 +460,9 @@ export default function Login() {
       </div>
     );
   }
-
+  if (userRole === "admin") {
+    return <AdminDashboard onLogout={signOut} />;
+  }
   const todayStatus = getTodayPresenceStatus();
   const attendanceSummary = getAttendanceSummary();
 
