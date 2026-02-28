@@ -77,8 +77,8 @@ export default function AuthForm({
             ? "Mendaftar..."
             : "Login..."
           : isSignUp
-          ? "Daftar"
-          : "Login"}
+            ? "Daftar"
+            : "Login"}
       </button>
     </div>
   );

@@ -12,11 +12,17 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
     "@tailwindcss/vite": "^4.1.8",
+    "jspdf": "^4.2.0",
+    "jspdf-autotable": "^5.0.7",
+    "lucide-react": "^0.575.0",
+    "qrcode": "^1.5.4",
+    "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
     "react-router-dom": "^7.6.2",
-    "tailwindcss": "^4.1.8"
+    "tailwindcss": "^4.1.8",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
