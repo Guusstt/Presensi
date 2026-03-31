@@ -12,31 +12,31 @@ const ALLOWED_LNG = 110.686943;
 // const ALLOWED_LNG = 110.4019936;
 const ALLOWED_RADIUS_METERS = 50;
 
-// const PRESENCE_CONFIG = {
-//   morning: {
-//     start: { hour: 6, minute: 30 },
-//     end: { hour: 7, minute: 15 },
-//     label: "Pagi",
-//   },
-//   afternoon: {
-//     start: { hour: 12, minute: 15 },
-//     end: { hour: 13, minute: 0 },
-//     label: "Siang",
-//   },
-// };
-
 const PRESENCE_CONFIG = {
   morning: {
-    start: { hour: 7, minute: 0 },
-    end: { hour: 7, minute: 30 },
+    start: { hour: 6, minute: 30 },
+    end: { hour: 7, minute: 15 },
     label: "Pagi",
   },
   afternoon: {
-    start: { hour: 10, minute: 45 },
-    end: { hour: 11, minute: 15 },
+    start: { hour: 12, minute: 15 },
+    end: { hour: 13, minute: 0 },
     label: "Siang",
   },
 };
+
+// const PRESENCE_CONFIG = {
+//   morning: {
+//     start: { hour: 7, minute: 0 },
+//     end: { hour: 7, minute: 30 },
+//     label: "Pagi",
+//   },
+//   afternoon: {
+//     start: { hour: 10, minute: 45 },
+//     end: { hour: 11, minute: 15 },
+//     label: "Siang",
+//   },
+// };
 
 function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
   const R = 6371000;
@@ -229,14 +229,14 @@ export default function Login() {
     const presenceType = getValidPresenceType();
     if (!presenceType) {
       const isFriday = new Date().getDay() === 5;
-      // const afternoonConfig = isFriday
-      //   ? { start: { hour: 11, minute: 0 }, end: { hour: 11, minute: 15 } }
-      //   : PRESENCE_CONFIG.afternoon;
-
-      // jadwal ramadhan
       const afternoonConfig = isFriday
-        ? { start: { hour: 10, minute: 15 }, end: { hour: 10, minute: 30 } }
+        ? { start: { hour: 11, minute: 0 }, end: { hour: 11, minute: 15 } }
         : PRESENCE_CONFIG.afternoon;
+
+      // // jadwal ramadhan
+      // const afternoonConfig = isFriday
+      //   ? { start: { hour: 10, minute: 15 }, end: { hour: 10, minute: 30 } }
+      //   : PRESENCE_CONFIG.afternoon;
 
       const morningTime = `${formatTime(
         PRESENCE_CONFIG.morning.start.hour,
