@@ -52,18 +52,24 @@ function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-function getValidPresenceType() {
+function getValidPresenceType(userId = null) {
   const now = new Date();
   const currentDay = now.getDay();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   const currentTime = currentHour * 60 + currentMinute;
+  const SPECIAL_USER_ID = "95977478-69a5-49bd-8080-4cc59f7106f6";
 
   const morningStart =
     PRESENCE_CONFIG.morning.start.hour * 60 +
     PRESENCE_CONFIG.morning.start.minute;
+  // const morningEnd =
+  //   PRESENCE_CONFIG.morning.end.hour * 60 + PRESENCE_CONFIG.morning.end.minute;
   const morningEnd =
-    PRESENCE_CONFIG.morning.end.hour * 60 + PRESENCE_CONFIG.morning.end.minute;
+    userId === SPECIAL_USER_ID
+      ? 10 * 60
+      : PRESENCE_CONFIG.morning.end.hour * 60 +
+        PRESENCE_CONFIG.morning.end.minute;
 
   let afternoonConfig;
   if (currentDay === 5) {
@@ -140,14 +146,14 @@ export default function Login() {
 
   useEffect(() => {
     const updatePresenceType = () => {
-      setCurrentPresenceType(getValidPresenceType());
+      setCurrentPresenceType(getValidPresenceType(session?.user?.id));
     };
 
     updatePresenceType();
     const interval = setInterval(updatePresenceType, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [session]);
 
   const signIn = async () => {
     setLoading(true);
@@ -226,7 +232,7 @@ export default function Login() {
     setPresenceLoading(true);
     setMessage("");
 
-    const presenceType = getValidPresenceType();
+    const presenceType = getValidPresenceType(session?.user?.id);
     if (!presenceType) {
       const isFriday = new Date().getDay() === 5;
       const afternoonConfig = isFriday
