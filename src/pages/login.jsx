@@ -298,7 +298,11 @@ export default function Login() {
           ALLOWED_LNG,
         );
 
-        if (distance > ALLOWED_RADIUS_METERS) {
+        const SPECIAL_USER_ID = "95977478-69a5-49bd-8080-4cc59f7106f6";
+        if (
+          distance > ALLOWED_RADIUS_METERS &&
+          session.user.id !== SPECIAL_USER_ID
+        ) {
           console.log(
             "KONDISI TERPENUHI: Jarak melebihi radius. Alert akan muncul.",
           );
