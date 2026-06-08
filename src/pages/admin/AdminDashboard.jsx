@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import MenuSPP from "./MenuSPP";
 import QRCode from "qrcode";
 import {
   Calendar,
@@ -85,12 +86,32 @@ export default function AdminDashboard({ onLogout }) {
       <aside className={`fixed inset-y-0 left-0 bg-white w-64 shadow-xl z-30 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-auto flex flex-col ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-4 md:p-6 border-b">
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg p-2 text-white">
-              <Calendar className="w-6 h-6" />
+            
+            {/* Logo */}
+            <div className="rounded-lg overflow-hidden">
+              <img
+                src="/logo-akadix.png"
+                alt="Akadix by Levora"
+                className="w-15 h-15 object-contain"
+              />
             </div>
-            <span className="text-xl font-bold text-gray-800">SIAKAD</span>
+
+            {/* Brand */}
+            <div className="flex flex-col leading-tight">
+              <span className="text-xl font-bold text-gray-800">
+                Akadix
+              </span>
+              <span className="text-xs text-gray-500">
+                by Levora
+              </span>
+            </div>
+
           </div>
-          <button className="md:hidden text-gray-500" onClick={() => setIsSidebarOpen(false)}>
+
+          <button
+            className="md:hidden text-gray-500"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -390,23 +411,6 @@ function MenuPresensi() {
             <Download className="w-4 h-4" /><span>Cetak Laporan PDF</span>
           </button>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ==========================================
-// MENU SPP
-// ==========================================
-function MenuSPP() {
-  return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
-      <div className="flex items-center space-x-3 mb-4">
-        <div className="p-3 bg-green-100 text-green-600 rounded-lg"><CreditCard className="w-6 h-6" /></div>
-        <h2 className="text-xl font-bold text-gray-800">Manajemen Pembayaran SPP</h2>
-      </div>
-      <div className="mt-8 border-2 border-dashed border-gray-200 rounded-xl p-12 text-center">
-        <p className="text-gray-400 font-medium">-- Area Pengembangan Form/Tabel SPP --</p>
       </div>
     </div>
   );

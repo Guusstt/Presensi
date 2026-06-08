@@ -1183,6 +1183,12 @@ export default function Login() {
                 Keluar dari Akun
               </button>
             </div>
+            <div className="px-4 pb-6 text-center">
+              <p className="text-xs text-gray-400 font-medium">
+                © {new Date().getFullYear()} Akadix · by Levora
+              </p>
+              <p className="text-xs text-gray-300 mt-0.5">All rights reserved</p>
+            </div>
           </div>
         )}
       </div>
